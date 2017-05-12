@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta name="keywords" content="cmd, unix, commandline, command, catmandu, jq, csvkit, xmllint, yaz" />
+    <meta name="description" content="In the beginning ... was the command line" />
+    <title>MARCspec & Catmandu</title>
+    <script src="./js/remark.min.js" type="text/javascript"></script>
+    <style type="text/css">
+      @font-face {
+        font-family: 'Droid Serif';
+        font-style: normal;
+        font-weight: normal;
+        src: local('Droid Serif'), url(./fonts/Droid_Serif.woff) format('woff');
+      }
+      @font-face {
+        font-family: 'Yanone Kaffeesatz';
+        font-style: normal;
+        font-weight: normal;
+        src: local('Yanone Kaffeesatz'), url(./fonts/Yanone_Kaffeesatz.woff) format('woff');
+      }
+      @font-face {
+        font-family: 'Ubuntu Mono';
+        font-style: normal;
+        font-weight: normal;
+        src: local('Ubuntu Mono'), url(./fonts/Ubuntu_Mono.woff2) format('woff2');
+      }
+      body {
+        font-family: 'Droid Serif';
+        font-size: 20px;
+        color: #777872; 
+      }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: 400;
+        margin-bottom: 0;
+      }
+      h1 { font-size: 4em; color: #272822; }
+      h2 { font-size: 3em; color: #272822; }
+      h3 { font-size: 1.75em; color: #777872; }
+      small { font-size: 0.5em; }
+      .footnote {
+        position: absolute;
+        bottom: 3em;
+      }
+      li p { line-height: 1.25em; }
+      .red { color: #fa0000; }
+      .large { font-size: 2em; }
+      a, a > code {
+        color: rgb(249, 38, 114);
+        text-decoration: none;
+      }
+      img {
+      max-width: 800px;
+      max-height: 600px;
+      }
+      code {
+        -moz-border-radius: 5px;
+        -web-border-radius: 5px;
+        background: #e7e8e2;
+        border-radius: 5px;
+        font-size: 16px;
+      }
+      .remark-code-line {
+        display: block;
+        white-space: pre-wrap;
+      }
+      .hljs-_ {
+        color: #e3ceab;
+      }
+      .hljs-pipe {
+        color: red;
+      }
+      .remark-code, .remark-inline-code { 
+        font-family: 'Ubuntu Mono';
+      }
+      .pull-left {
+        float: left;
+        width: 47%;
+      }
+      .pull-right {
+        float: right;
+        width: 47%;
+      }
+      .pull-right ~ p {
+        clear: both;
+      }
+      #slideshow .slide .content code {
+        font-size: 0.8em;
+      }
+      #slideshow .slide .content pre code {
+        font-size: 0.9em;
+        padding: 15px;
+      }
+      .inverse {
+        background: #272822;
+        color: #777872;
+        /*text-shadow: 0 0 20px #333;*/
+      }
+      .inverse h1, .inverse h2 {
+        color: #f3f3f3;
+        line-height: 0.8em;
+      }
+
+      /* Slide-specific styling */
+      #slide-inverse .footnote {
+        bottom: 12px;
+        left: 20px;
+      }
+      #slide-how .slides {
+        font-size: 0.9em;
+        position: absolute;
+        top:  151px;
+        right: 140px;
+      }
+      #slide-how .slides h3 {
+        margin-top: 0.2em;
+      }
+      #slide-how .slides .first, #slide-how .slides .second {
+        padding: 1px 20px;
+        height: 90px;
+        width: 120px;
+        -moz-box-shadow: 0 0 10px #777;
+        -webkit-box-shadow: 0 0 10px #777;
+        box-shadow: 0 0 10px #777;
+      }
+      #slide-how .slides .first {
+        background: #fff;
+        position: absolute;
+        top: 20%;
+        left: 20%;
+        z-index: 1;
+      }
+      #slide-how .slides .second {
+        position: relative;
+        background: #fff;
+        z-index: 0;
+      }
+
+      /* Two-column layout */
+      .left-column {
+        color: #777;
+        width: 20%;
+        height: 92%;
+        float: left;
+      }
+        .left-column h2:last-of-type, .left-column h3:last-child {
+          color: #000;
+        }
+      .right-column {
+        width: 75%;
+        float: right;
+        padding-top: 2em;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+
+class: middle center
+# MARCspec and Catmandu
+## Carsten Klee
+### 2017-05-15 ZIB
+
+---
+class: middle
+## The problem
+
+In MARC data is sometimes spread over multiple fields. Or the semantics of data values can only be derived from data of a different field.
+
+##Example
+__342__ 	02__$a__Universal Transverse Mercator__$g__-105.00__$h__0.00
+
+---
+class: middle
+## The solution
+
+In Catmandu there exists a Fix called __marc_spec__.
+
+## Data
+
+__342__ 	02__$a__Universal Transverse Mercator__$g__-105.00__$h__0.00
+
+## Fix
+
+```perl
+    marc_spec('342$g-h{__2}{LDR/6=\e|LDR/6=\f}', latlon)
+```
+
+---
+class: middle
+## What is MARCspec?
+
+ - a path language for MARC records like XPath for XML
+ - references data in a MARC record on multiple levels
+    - from the whole record to a single character
+ - works for all ISO 2709 applications
+ - can be expressed through nested data (JSON / XML ) structures and as string
+ - a specification, not a tool!
+ 
+http://marcspec.github.io/MARCspec
+
+---
+class: middle center
+## Field spec
+---
+class: middle center
+# LDR
+The leader
+<hr>
+# 245
+Field 245
+
+---
+class: middle center
+## Field spec wildcards
+
+---
+class: middle center
+# ...
+Whole record
+<hr>
+# 24.
+All fields beginning with 24
+<hr>
+# ..0
+All fields ending with 0
+
+---
+class: middle center
+## Subfield spec
+
+---
+class: middle center
+# 245$a
+Subfield a of field 245
+<hr>
+# 245$a$c
+Subfields a and c of field 245
+<hr>
+# 245$a-c
+Subfields a to c of field 245
+
+---
+class: middle center
+## Field repetitions
+
+---
+class: middle center
+# 300[0]
+First occurrence of field 300
+<hr>
+# 300[1]
+Second occurrence of field 300
+<hr>
+# 300[#]
+Last occurrence of field 300
+<hr>
+# 300[1-#]
+All but first occurrence of field 300
+
+---
+class: middle center
+## Subfield repetitions
+
+---
+class: middle center
+# 300[0]$a
+All occurences of subfield a of first occurrence of field 300
+<hr>
+# 300[0]$a[1]
+Second occurence of subfield a of first occurrence of field 300
+<hr>
+# 300$a[0-1]
+First two ocurrences of subfield a of field 300
+<hr>
+# 300$a[#-1]
+Last two occurrences of subfield a of field 300
+<hr>
+# 300[1-#]
+All but first occurrence of field 300
+
+---
+class: middle center
+## Character position and range
+
+---
+class: middle center
+# LDR/4
+Fith character of leader
+<hr>
+# 007/1-#&nbsp;
+All but first character
+<hr>
+# 245$a/#-1
+last two characters
+
+---
+class: middle center
+## Indicators
+
+---
+class: middle center
+# 245_10$a
+Indicator 1 must be 1 and indicator 2 must be 0
+<hr>
+# 245__0$a
+Indicator 2 must be 0
+<hr>
+# 245\_1\_$a or 245_1$a 
+Indicator 1 must be 1
+
+---
+class: middle
+## Subspecs
+- contextualizes the preceding field/subfield spec
+- is either true or false
+- is like in programming languages IF ( TRUE/FALSE ) THEN ...
+
+## Form: { SUBTERM OPERATOR SUBTERM }
+
+SUBTERM = fieldSpec / subfieldSpec / comparisonString / abbreviation
+
+OPERATOR = "=" / "!=" / "~" / "!~" / "!" / "?"
+
+---
+class: middle center
+# Abbreviation & default operator
+## 020$c{$a}
+<hr>
+## 020$c{020$a}
+<hr>
+## 020$c{?020$a}
+<hr>
+## 020$c{020$a?020$a}
+
+---
+class: middle center
+# Boolean Syntax
+## 245$b{007/0=\a|007/0=\t}
+<hr>
+## 008/18{LDR/6=\a}{LDR/7=\a|LDR/7=\c}
+
+
+---
+class: middle
+## MARCspec in Catmandu
+
+MARCspec defines WHAT data to return, but not HOW!
+
+### Fix marc_spec
+#### default
+
+```perl
+# INPUT
+[650," ",0,"a","Perl (Computer program language)"],
+[650," ",0,"a","Web servers."]
+ 
+# CALL
+marc_spec('650', subjects)
+ 
+# OUTPUT
+{
+  subjects "Perl (Computer program language)Web servers."
+}
+```
+
+---
+class: middle
+### Fix marc_spec
+#### with option join
+
+```perl
+# INPUT
+[650," ",0,"a","Perl (Computer program language)"],
+[650," ",0,"a","Web servers."]
+ 
+# CALL
+marc_spec('650', subjects, join:'###')
+ 
+# OUTPUT
+{
+  subjects "Perl (Computer program language)###Web servers."
+}
+```
+
+---
+class: middle
+### Fix marc_spec
+#### with option split
+
+```perl
+# INPUT
+[650," ",0,"a","Perl (Computer program language)"],
+[650," ",0,"a","Web servers."]
+ 
+# CALL
+marc_spec('650', subjects, split:1)
+ 
+# OUTPUT
+{
+  subjects [
+    [0] "Perl (Computer program language)"
+    [1] "Web servers."
+}
+```
+
+---
+class: middle
+### Fix marc_spec
+#### with option nested
+
+```perl
+# INPUT
+[650," ",0,"a","Perl (Computer program language)"],
+[650," ",0,"a","Web servers."]
+ 
+# CALL
+marc_spec('650', subjects, nested:1)
+ 
+# OUTPUT
+{
+  subjects [
+      [0] [
+          [0] "Perl (Computer program language)"
+      ]
+      [1] [
+          [0] "Web servers."
+      ]
+  ]
+}
+```
+
+---
+class: middle
+### Fix marc_spec
+#### with option pluck
+
+```perl
+# INPUT
+["020"," ", " ","a","0491001304","q","black leather"]
+ 
+# CALL
+marc_spec('020$q$a', isbn, join:': ', pluck:1)
+ 
+# OUTPUT
+{
+  isbn "black leather: 0491001304"
+}
+```
+
+---
+class: middle
+### Fix marc_spec
+#### with option invert
+
+```perl
+# INPUT
+["020"," ", " ","a","0491001304","q","black leather"]
+ 
+# CALL
+marc_spec('020$a', isbn.info, invert:1)
+ 
+# OUTPUT
+{
+  isbn {
+    info "black leather"
+  }
+}
+```
+
+---
+class: middle
+### Fix marc_spec
+#### with option value
+
+```perl
+# INPUT
+["020"," ", " ","a","0491001304","q","black leather"]
+ 
+# CALL
+marc_spec('020$a', isbn.prefix, value:'ISBN: ')
+ 
+# OUTPUT
+{
+  isbn {
+    prefix "ISBN: "
+  }
+}
+```
+
+---
+class: middle
+### Docs & Contact
+
+MARCspec: 
+
+- Spec: http://marcspec.github.io/MARCspec
+- GitHub: https://github.com/MARCspec
+- Validator: http://marcspec.collidoscope.de
+
+marc_spec Fix: https://metacpan.org/pod/Catmandu::Fix::marc_spec
+
+- Twitter: @collidoscope
+- GitHub: @cKlee
+    
+
+    </textarea>
+    <div id="slideshow"></div>
+    <script type="text/javascript">
+        var slideshow = remark.create({
+            highlightLanguage: 'bash',
+            highlightStyle: 'zenburn',
+        });
+    </script>
+  </body>
+</html>
